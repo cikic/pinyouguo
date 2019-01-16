@@ -1,6 +1,8 @@
 package com.pinyougou.pojo;
 
-public class TbSpecificationOption {
+import java.io.Serializable;
+
+public class TbSpecificationOption implements Serializable{
     private Long id;
 
     private String optionName;
@@ -40,4 +42,12 @@ public class TbSpecificationOption {
     public void setOrders(Integer orders) {
         this.orders = orders;
     }
+
+	@Override
+	public String toString() {
+		return "TbSpecificationOption [id=" + id + ", optionName=" + optionName + ", specId=" + specId + ", orders="
+				+ orders + "]";
+	}
+    
+    
 }

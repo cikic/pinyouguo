@@ -1,8 +1,9 @@
 package com.pinyougou.pojo;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class TbSeller {
+public class TbSeller implements Serializable{
     private String sellerId;
 
     private String name;
@@ -19,7 +20,7 @@ public class TbSeller {
 
     private String status;
 
-    private String addressDetail;
+	private String addressDetail;
 
     private String linkmanName;
 
@@ -108,7 +109,16 @@ public class TbSeller {
     }
 
     public String getStatus() {
-        return status;
+//    	if(status.equals("0")) {
+//			return "待审核";
+//	   	}else if(status.equals("1")){
+//	   		return "已审核";
+//	   	}else if(status.equals("2")) {
+//	   		return "审核未通过";
+//	   	}else {
+//	   		return "关闭";
+//	   	}
+    	return status;
     }
 
     public void setStatus(String status) {
