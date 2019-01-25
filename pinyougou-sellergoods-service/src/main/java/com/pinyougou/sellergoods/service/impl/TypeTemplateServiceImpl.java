@@ -3,10 +3,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.pinyougou.mapper.TbSpecificationOptionMapper;
@@ -31,6 +33,29 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
 
 	@Autowired
 	private TbTypeTemplateMapper typeTemplateMapper;
+	
+	//注入redis缓存服务
+	@Autowired
+	private RedisTemplate redisTemplate;
+	
+	/**
+	 * 将品牌列表与规格列表放入缓存
+	 */
+	private void saveToRedis(){
+		List<TbTypeTemplate> templateList = findAll();
+		for(TbTypeTemplate template:templateList){
+			//得到品牌列表
+			List brandList= JSON.parseArray(template.getBrandIds(), Map.class) ;
+			redisTemplate.boundHashOps("brandList").put(template.getId(), brandList);
+			
+			//得到规格列表
+			List<Map> specList = findSpecList(template.getId());
+			redisTemplate.boundHashOps("specList").put(template.getId(), specList);
+			
+		}
+		System.out.println("缓存品牌列表");
+		
+	}
 	
 	/**
 	 * 查询全部
@@ -111,13 +136,18 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
 	
 		}
 		
-		Page<TbTypeTemplate> page= (Page<TbTypeTemplate>)typeTemplateMapper.selectByExample(example);		
+		Page<TbTypeTemplate> page= (Page<TbTypeTemplate>)typeTemplateMapper.selectByExample(example);
+		
+		//缓存处理,在每次增删改后就会重新存入到缓存
+		 saveToRedis();
+		 
 		return new PageResult(page.getTotal(), page.getResult());
 	}
 
 	@Autowired
 	private TbSpecificationOptionMapper specificationOptionMapper;
 		
+	//封装optionName到原json对象
 	@Override
 	public List<Map> findSpecList(Long id) {
 		//查询模板

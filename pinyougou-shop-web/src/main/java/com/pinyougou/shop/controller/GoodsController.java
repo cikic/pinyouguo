@@ -1,4 +1,5 @@
 package com.pinyougou.shop.controller;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.pinyougou.pojo.TbGoods;
 import com.pinyougou.pojogroup.Goods;
+import com.pinyougou.search.service.ItemSearchService;
 import com.pinyougou.sellergoods.service.GoodsService;
 
 import entity.PageResult;
@@ -23,6 +25,11 @@ public class GoodsController {
 
 	@Reference
 	private GoodsService goodsService;
+	
+	
+	@Reference
+	private ItemSearchService itemSearchService;
+	
 	
 	/**
 	 * 返回全部列表
@@ -104,6 +111,7 @@ public class GoodsController {
 	public Result delete(Long [] ids){
 		try {
 			goodsService.delete(ids);
+			itemSearchService.deleteByGoodsId(Arrays.asList(ids));
 			return new Result(true, "删除成功"); 
 		} catch (Exception e) {
 			e.printStackTrace();
